@@ -42,20 +42,22 @@ class SE2:
             self.rotation = SO2()
 
     def __mul__(self, other: SE2) -> SE2:
-        """Compose two transformation, i.e., self * other"""
-        # todo: HW01: implement composition of two transformation.
-        return SE2()
+        """Compose two transformation, i.e., self * other"""        
+        translation = self.translation + self.rotation.act(other.translation)
+        rotation = self.rotation * other.rotation
+        return SE2(translation, rotation)
 
     def inverse(self) -> SE2:
-        """Compute inverse of the transformation. Do not use np.linalg.inv."""
-        # todo: HW1 implement inverse
-        return SE2()
+        """Compute inverse of the transformation. Do not use np.linalg.inv."""        
+        rotation = self.rotation.inverse()
+        translation = -rotation.act(self.translation)
+        return SE2(translation, rotation)
 
     def act(self, vector: ArrayLike) -> np.ndarray:
         """Transform given 2D vector by this SE2 transformation."""
         v = np.asarray(vector)
-        assert v.shape == (2,)
-        # todo: HW1 implement transformation of a given vector
+        assert v.shape == (2,)        
+        v = self.rotation.act(v) + self.translation
         return v
 
     def set_from(self, other: SE2):

@@ -27,27 +27,56 @@ class SO3:
     def exp(rot_vector: ArrayLike) -> SO3:
         """Compute SO3 transformation from a given rotation vector, i.e. exponential
         representation of the rotation."""
-        v = np.asarray(rot_vector)
+        v = np.asarray(rot_vector) # create np array from input
         assert v.shape == (3,)
+
+        theta = np.linalg.norm(v) # compute the angle
+        v_hat = v/theta # normalize the vector
+        v_matrix = np.array([[0, -v_hat[2], v_hat[1]],
+                             [v_hat[2], 0, -v_hat[0]],
+                             [-v_hat[1], v_hat[0], 0]]) # skew symmetric matrix
+        R = np.eye(3) + np.sin(theta)*v_matrix + (1-np.cos(theta))*(v_matrix @ v_matrix) # Rodrigues' formula
+
         t = SO3()
-        # todo HW01: implement Rodrigues' formula, t.rot = ...
+        t.rot = R
         return t
 
     def log(self) -> np.ndarray:
         """Compute rotation vector from this SO3"""
-        # todo HW01: implement computation of rotation vector from this SO3
         v = np.zeros(3)
+
+        if np.allclose(self.rot, np.eye(3)):
+            return v # zero rotation vector for zero rotation
+
+        tr_R = np.trace(self.rot)
+        if(tr_R == -1): # 180 degree rotation
+            # find the axis of rotation
+            if(not np.isclose(self.rot[0,0], -1)):
+                v = 1/np.sqrt(2*(1 + self.rot[0,0])) * np.array([1 + self.rot[0,0], self.rot[1,0], self.rot[2,0]])
+            elif(not np.isclose(self.rot[1,1], -1)):
+                v = 1/np.sqrt(2*(1 + self.rot[1,1])) * np.array([self.rot[0,1], 1 + self.rot[1,1], self.rot[2,1]])
+            else:
+                v = 1/np.sqrt(2*(1 + self.rot[2,2])) * np.array([self.rot[0,2], self.rot[1,2], 1 + self.rot[2,2]])
+            v = np.pi * v # rotation vector is angle * axis
+            return v
+
+        theta = np.arccos((tr_R - 1)/2) # compute the angle
+        if theta == 0:
+            return v # zero rotation vector for zero rotation
+        v_matrix = (self.rot - self.rot.T)/(2*np.sin(theta)) # skew symmetric matrix
+        v = theta * np.array([v_matrix[2,1], v_matrix[0,2], v_matrix[1,0]]) # rotation vector
+
         return v
 
     def __mul__(self, other: SO3) -> SO3:
-        """Compose two rotations, i.e., self * other"""
-        # todo: HW01: implement composition of two rotation.
-        return SO3()
+        """Compose two rotations, i.e., self * other"""        
+        composed = self.rot @ other.rot
+        return SO3(composed)
 
     def inverse(self) -> SO3:
         """Return inverse of the transformation."""
-        # todo: HW01: implement inverse, do not use np.linalg.inverse()
-        return SO3()
+        transposed = self.rot.T
+        return SO3(transposed)
 
     def act(self, vector: ArrayLike) -> np.ndarray:
         """Rotate given vector by this transformation."""
@@ -61,26 +90,33 @@ class SO3:
 
     @staticmethod
     def rx(angle: float) -> SO3:
-        """Return rotation matrix around x axis."""
-        # todo: HW1opt: implement rx
-        raise NotImplementedError("RX needs to be implemented.")
+        """Return rotation matrix around x axis."""        
+        R = np.array([[1, 0, 0],
+                      [0, np.cos(angle), -np.sin(angle)],
+                      [0, np.sin(angle), np.cos(angle)]])
+        return SO3(R)        
 
     @staticmethod
     def ry(angle: float) -> SO3:
-        """Return rotation matrix around y axis."""
-        # todo: HW1opt: implement ry
-        raise NotImplementedError("RY needs to be implemented.")
+        """Return rotation matrix around y axis."""       
+        R = np.array([[np.cos(angle), 0, np.sin(angle)],
+                      [0, 1, 0],
+                      [-np.sin(angle), 0, np.cos(angle)]])
+        return SO3(R)
 
     @staticmethod
     def rz(angle: float) -> SO3:
         """Return rotation matrix around z axis."""
-        # todo: HW1opt: implement rz
-        raise NotImplementedError("RZ needs to be implemented.")
-
+        R = np.array([[np.cos(angle), -np.sin(angle), 0],
+                      [np.sin(angle), np.cos(angle), 0],
+                      [0, 0, 1]])
+        return SO3(R)
+   
     @staticmethod
     def from_quaternion(q: ArrayLike) -> SO3:
         """Compute rotation from quaternion in a form [qx, qy, qz, qw]."""
         # todo: HW1opt: implement from quaternion
+
         raise NotImplementedError("From quaternion needs to be implemented")
 
     def to_quaternion(self) -> np.ndarray:

@@ -29,20 +29,22 @@ class SE3:
         assert self.translation.shape == (3,)
 
     def __mul__(self, other: SE3) -> SE3:
-        """Compose two transformation, i.e., self * other"""
-        # todo: HW01: implement composition of two transformation.
-        return SE3()
+        """Compose two transformation, i.e., self * other"""        
+        rotation = self.rotation * other.rotation
+        translation = self.translation + self.rotation.act(other.translation)
+        return SE3(translation, rotation)
 
     def inverse(self) -> SE3:
         """Compute inverse of the transformation"""
-        # todo: HW1 implement inverse
-        return SE3()
+        rotation = self.rotation.inverse()
+        translation = -rotation.act(self.translation)
+        return SE3(translation, rotation)
 
     def act(self, vector: ArrayLike) -> np.ndarray:
         """Rotate given 3D vector by this transformation."""
         v = np.asarray(vector)
         assert v.shape == (3,)
-        # todo: HW1 implement transformation of a given vector
+        v = self.rotation.act(v) + self.translation
         return v
 
     def set_from(self, other: SE3):

@@ -23,24 +23,26 @@ class SO2:
         super().__init__()
         # todo HW01: implement computation of rotation matrix from the given angle
         self.rot: np.ndarray = np.zeros((2, 2))
+        self.rot = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
 
     def __mul__(self, other: SO2) -> SO2:
-        """Compose two rotations, i.e., self * other"""
-        # todo: HW01: implement composition of two rotation.
-        pass
+        """Compose two rotations, i.e., self * other"""        
+        angle = self.angle + other.angle
+        return SO2(angle)
 
     @property
     def angle(self) -> float:
         """Return angle [rad] from the internal rotation matrix representation."""
-        # todo: HW01: implement computation of the angle from rotation matrix self.rot.
         angle = 0.0
+        angle = np.arccos(self.rot[0,0]) # get an absolute value
+        if(self.rot[1,0] < 0):  # correct the sign
+                angle = -angle
         return angle
 
     def inverse(self) -> SO2:
         """Return inverse of the transformation. Do not change internal property of the
-        object."""
-        # todo: HW01: implement inverse, do not use np.linalg.inverse()
-        pass
+        object."""        
+        return SO2(-self.angle) 
 
     def act(self, vector: ArrayLike) -> np.ndarray:
         """Rotate given vector by this transformation."""
