@@ -87,7 +87,27 @@ class PlanarManipulator(RobotBase):
     def flange_pose(self) -> SE2:
         """Return the pose of the flange in the reference frame."""
         # todo HW02: implement fk for the flange
-        return SE2()
+        T = SE2()
+        T.set_from(self.base_pose)
+
+        for i, link in enumerate(self.structure):
+            if link == "R":
+                t = np.array([self.link_parameters[i], 0])
+                theta = self.q[i]
+
+            elif link == "P":
+                t = np.array([self.q[i], 0])
+                theta = self.link_parameters[i]
+
+            else:
+                # Raise error "Structure element not supported"
+                pass
+            
+            R = SE2(rotation=theta)
+            T_x = SE2(translation=t)
+            T_i = R * T_x
+            T = T * T_i
+        return T
 
     def fk_all_links(self) -> list[SE2]:
         """Compute FK for frames that are attached to the links of the robot.
@@ -95,6 +115,29 @@ class PlanarManipulator(RobotBase):
         """
         # todo HW02: implement fk
         frames = []
+        T = SE2()
+        T.set_from(self.base_pose)
+        frames.append(T)
+
+        for i, link in enumerate(self.structure):
+            if link == "R":
+                t = np.array([self.link_parameters[i], 0])
+                theta = self.q[i]
+
+            elif link == "P":
+                t = np.array([self.q[i], 0])
+                theta = self.link_parameters[i]
+
+            else:
+                # Raise error "Structure element not supported"
+                pass
+            
+            R = SE2(rotation=theta)
+            T_x = SE2(translation=t)
+            T_i = R * T_x
+            T = T * T_i
+            frames.append(T)
+
         return frames
 
     def _gripper_lines(self, flange: SE2):
