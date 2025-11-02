@@ -86,23 +86,17 @@ class PlanarManipulator(RobotBase):
 
     def flange_pose(self) -> SE2:
         """Return the pose of the flange in the reference frame."""
-        # todo HW02: implement fk for the flange
+
         T = SE2()
         T.set_from(self.base_pose)
 
-        for i, link in enumerate(self.structure):
-            if link == "R":
-                t = np.array([self.link_parameters[i], 0])
-                theta = self.q[i]
+        angles = self.get_angles()
+        lengths = self.get_lengths()
 
-            elif link == "P":
-                t = np.array([self.q[i], 0])
-                theta = self.link_parameters[i]
+        for angle, length in zip(angles, lengths):            
+            theta = angle
+            t = np.array([length, 0])
 
-            else:
-                # Raise error "Structure element not supported"
-                pass
-            
             R = SE2(rotation=theta)
             T_x = SE2(translation=t)
             T_i = R * T_x
@@ -119,18 +113,12 @@ class PlanarManipulator(RobotBase):
         T.set_from(self.base_pose)
         frames.append(T)
 
-        for i, link in enumerate(self.structure):
-            if link == "R":
-                t = np.array([self.link_parameters[i], 0])
-                theta = self.q[i]
+        angles = self.get_angles()
+        lengths = self.get_lengths()
 
-            elif link == "P":
-                t = np.array([self.q[i], 0])
-                theta = self.link_parameters[i]
-
-            else:
-                # Raise error "Structure element not supported"
-                pass
+        for angle, length in zip(angles, lengths):            
+            theta = angle
+            t = np.array([length, 0])
             
             R = SE2(rotation=theta)
             T_x = SE2(translation=t)
@@ -163,12 +151,76 @@ class PlanarManipulator(RobotBase):
         """Computes jacobian of the manipulator for the given structure and
         configuration."""
         jac = np.zeros((3, len(self.q)))
-        # todo: HW04 implement jacobian computation
+
+        lengths = self.get_lengths()
+        angles = self.get_angles()
+
+        n = len(self.q)
+
+        # Compute theta* for every joint
+        theta_stars = np.zeros(n)
+        theta_star = self.base_pose.rotation.angle
+        for j in range(0, n):
+            theta_star += angles[j]
+            theta_stars[j] = theta_star
+
+        for i, link in enumerate(self.structure): # compute i-th column of Jacobian
+            dx = 0
+            dy = 0
+            dtheta = 0
+
+            if link == "R":
+                dx = 0                              
+                for j in range(i, n):                    
+                    dx += -np.sin(theta_stars[j]) * lengths[j]
+
+                dy = 0
+                for j in range(i, n):
+                    dy += np.cos(theta_stars[j]) * lengths[j]
+                
+                dtheta = 1
+
+            elif link == "P":
+                dx = np.cos(theta_stars[i])
+                dy = np.sin(theta_stars[i])
+                dtheta = 0
+            else:
+                # Unsupported structural element
+                pass
+            
+            jac[0][i] = dx
+            jac[1][i] = dy
+            jac[2][i] = dtheta
+
         return jac
 
     def jacobian_finite_difference(self, delta=1e-5) -> np.ndarray:
         jac = np.zeros((3, len(self.q)))
-        # todo: HW04 implement jacobian computation
+        
+        # original flange pose
+        T_orig = self.flange_pose()
+        pos_orig = T_orig.translation
+        rot_orig = T_orig.rotation.angle
+        # save original q vector
+        q_orig = self.q.copy()
+
+        for i, q_i in enumerate(q_orig):
+            # pertrube q
+            self.q[i] = q_i + delta
+            # compute pertrubed flange pose
+            T_p = self.flange_pose()
+            pos_p = T_p.translation
+            rot_p = T_p.rotation.angle
+            # restore original q
+            self.q = q_orig.copy()
+            # compute Jacobian column
+            d_pos = (pos_p - pos_orig)/delta            
+            d_rot = ((rot_p - rot_orig + np.pi) % (2*np.pi) - np.pi) / delta
+
+            jac[0][i] = d_pos[0]
+            jac[1][i] = d_pos[1]
+            jac[2][i] = d_rot
+
         return jac
 
     def ik_numerical(
@@ -212,3 +264,31 @@ class PlanarManipulator(RobotBase):
         return MultiLineString(
             (*gripper_lines, *zip(points[:-1], points[1:]))
         ).intersects(self.obstacles)
+    
+    def get_angles(self) -> np.ndarray:
+        angles = np.zeros(len(self.structure))
+        
+        for i, link in enumerate(self.structure):
+            if link == "R":
+                angles[i] = self.q[i]
+            elif link == "P":
+                angles[i] = self.link_parameters[i]
+            else:
+                # Unsupported structural element
+                pass
+
+        return angles
+    
+    def get_lengths(self) -> np.ndarray:
+        lenghts = np.zeros(len(self.structure))
+        
+        for i, link in enumerate(self.structure):
+            if link == "R":
+                lenghts[i] = self.link_parameters[i]
+            elif link == "P":
+                lenghts[i] = self.q[i]
+            else:
+                # Unsupported structural element
+                pass
+
+        return lenghts
