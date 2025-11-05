@@ -1,6 +1,12 @@
 ================
-Robotics Toolbox
+Robotics Toolbox - custom implemetation
 ================
+My own implementation of CTU Robotics Toolbox created as part of the Robotics course.
+
+Readme from original repository follows:
+----------------
+Robotics Toolbox
+----------------
 
 Robotics toolbox library is template repository that needs to be filled with content so all unit tests are passing.
 It is used as template and verification tool for students laboratories of Robotics Course at Czech Technical University.
