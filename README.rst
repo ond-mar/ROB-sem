@@ -3,8 +3,9 @@ Robotics Toolbox - custom implemetation
 ================
 My own implementation of CTU Robotics Toolbox created as part of the Robotics course.
 
+
 Readme from original repository follows:
-----------------
+
 Robotics Toolbox
 ----------------
 
