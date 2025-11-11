@@ -16,8 +16,8 @@ step_count = 20
 
 q = robot.get_q()
 q[3] = np.pi / 2
-
-for i in range(step_count):
+q[0] = step * 12 + q[0]
+for i in range(12, step_count):
     q[0] = q[0] + step
     q[1] = - i * step
     q[2] = -0.23
