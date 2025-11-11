@@ -1,6 +1,7 @@
 from ctu_bosch_sr450 import RobotBosch
 from camera import CameraHelper
 import numpy as np
+import time
 
 robot = RobotBosch()
 robot.initialize()
@@ -22,6 +23,9 @@ for i in range(step_count):
     q[2] = -0.23
     robot.move_to_q(q)
     robot.wait_for_motion_stop()
+    time.sleep(0.5)
+    camera_helper.capture_image()
+
 
 q[3] = 2 * np.pi - np.pi / 2
 robot.move_to_q(q)
@@ -39,6 +43,9 @@ for i in range(step_count):
     q[2] = -0.23
     robot.move_to_q(q)
     robot.wait_for_motion_stop()
+    time.sleep(0.5)
+    camera_helper.capture_image()
+
 
 q = robot.get_q()
 q[3] = home_q_3
