@@ -9,7 +9,7 @@ class CameraHelper:
         self.prefix = prefix
         self.robot = robot
 
-    def capture_image(self, save: bool = True):
+    def capture_image(self, name: str | None, save: bool = True):
         timestamp = datetime.now().isoformat()
         image = self.robot.grab_image()
         cv2.imwrite(self.prefix + "_" + timestamp + ".png", image)
