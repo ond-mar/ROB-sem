@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 from typing import List
 from numpy.typing import ArrayLike
+from utils import load_matrix
 
 def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.ndarray:
     images = np.asarray(images)
@@ -48,10 +49,6 @@ robot.initialize(False)
 
 DIR_PATH = Path("hoop_images")
 
-def load_matrix(name):
-    with open(name, "rb") as f:
-        return np.load(f)
-
 stems = [f.stem for f in DIR_PATH.iterdir()]
 
 images = []
@@ -63,7 +60,11 @@ for stem in stems:
     matrix = load_matrix(mat_path)
     image = cv2.imread(im_path)
 
-    coords = robot.fk(matrix)[:-1]
+    coords = list(robot.fk(matrix))
+
+    coords[0] += 0.14 * np.cos(coords[3])
+    coords[1] += 0.14 * np.sin(coords[3])
+
     images.append(image)
     vectors.append({'translation_vector': np.asarray(coords)})
 
