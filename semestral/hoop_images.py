@@ -37,8 +37,10 @@ for i in range(12, step_count):
     q[1] = - i * step
     robot.move_to_q(q)
     robot.wait_for_motion_stop()
-    time.sleep(0.5)
-    save_pose(robot.get_q())
+    for i in range(0, 5):
+        
+        time.sleep(0.5)
+        save_pose(robot.get_q())
 
 
 q[3] = 2 * np.pi - np.pi / 2

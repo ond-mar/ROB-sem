@@ -12,3 +12,6 @@ class CameraHelper:
     def capture_image(self, name: str, save: bool = True):
         image = self.robot.grab_image()
         cv2.imwrite(name + ".png", image)
+
+    def get_image(self):
+        return self.robot.grab_image()

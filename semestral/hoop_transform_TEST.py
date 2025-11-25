@@ -12,6 +12,14 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
 
     img_centers = np.empty((len(hoop_positions), 2))
 
+    ref_centers = np.empty((len(hoop_positions), 2))
+    phi = np.empty((len(hoop_positions), 1))
+    for i, hoop in enumerate(hoop_positions):
+        pos = hoop["translation_vector"]
+        ref_centers[i] = [pos[0], pos[1]]
+        phi[i] = [pos[3]] 
+
+
     for i, img in enumerate(images):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) # convert to HSV
         img = cv2.medianBlur(img, 5) # apply median blur to reduce noise
@@ -25,7 +33,7 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
         circles = np.uint16(np.around(circles))
 
         x, y, r = circles[0][0]
-        img_centers[i] = [x, y]
+        img_centers[i] = [x - 900*np.cos(-phi[i][0]+np.pi/2), y + 900*np.sin(-phi[i][0]+np.pi/2)]
 
         # copy = img.copy()
         # cv2.circle(copy, center=(x, y), radius=2, color=(0, 0, 255))
@@ -35,11 +43,7 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
         # cv2.destroyAllWindows()
 
 
-    ref_centers = np.empty((len(hoop_positions), 2))
-    for i, hoop in enumerate(hoop_positions):
-        pos = hoop["translation_vector"]
-        ref_centers[i] = [pos[0], pos[1]] 
-
+    
     homography = cv2.findHomography(img_centers, ref_centers, cv2.RANSAC)[0]
     return homography
 
@@ -62,8 +66,8 @@ for stem in stems:
 
     coords = list(robot.fk(matrix))
 
-    coords[0] += 0.14 * np.cos(coords[3])
-    coords[1] += 0.14 * np.sin(coords[3])
+    #coords[0] += 0.14 * np.cos(coords[3])
+    #coords[1] += 0.14 * np.sin(coords[3])
 
     images.append(image)
     vectors.append({'translation_vector': np.asarray(coords)})
