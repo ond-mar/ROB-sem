@@ -7,7 +7,7 @@ robot.initialize()
 
 print(robot.fk(robot.get_q()))
 
-ref_x, ref_y = 0, 0
+ref_x, ref_y = 200 , 80
 
 homography = load_matrix("homography.npy")
 
@@ -15,7 +15,7 @@ vector = np.asarray([ref_x, ref_y, 1]) @ homography.T
 
 print(vector)
 
-new_q = robot.ik_xyz(0.35, 0.35, 0.5)
+new_q = robot.ik_xyz(vector[0], vector[1], 0.3)
 
 print(new_q)
 
