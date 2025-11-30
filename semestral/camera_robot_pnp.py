@@ -45,8 +45,8 @@ for stem in stems:
 
     coords = list(robot.fk(matrix))
 
-    coords[0] += 0.135 * np.cos(coords[3] + np.pi)
-    coords[1] += 0.135 * np.sin(coords[3] + np.pi)
+    coords[0] += 0.135 * np.cos(coords[3] - np.pi)
+    coords[1] += 0.135 * np.sin(coords[3] - np.pi)
 
     images.append(image)
     vectors.append(coords[0:3])
