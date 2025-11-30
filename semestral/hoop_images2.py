@@ -87,12 +87,12 @@ for i, pos in enumerate(q_positions):
     robot.wait_for_motion_stop()
 
     shift_height(robot, MAX_Z_Q)
-    get_data_in_pose(robot, camera, pose_name[i] + "HIGH_")
+    get_data_in_pose(robot, camera, pose_names[i] + "HIGH_")
     
     rotate_to_zero(robot)
 
     shift_height(robot, MIN_Z_Q)
-    get_data_in_pose(robot, camera, pose_name[i] + "LOW_")
+    get_data_in_pose(robot, camera, pose_names[i] + "LOW_")
 
 robot.hard_home()
 robot.close()
