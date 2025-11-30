@@ -38,7 +38,7 @@ def find_center(img: list) -> list | None:
 
     return circles[0][0]
 
-def get_data_in_pose(r: RobotBosch, camera: CameraHelper):
+def get_data_in_pose(r: RobotBosch, camera: CameraHelper, pose_name: str):
     print("Getting data")
     for i in range(math.floor((np.pi * 2) / DEFAULT_INCREMENT)):
         rotate(r, DEFAULT_INCREMENT)
@@ -62,8 +62,8 @@ def get_data_in_pose(r: RobotBosch, camera: CameraHelper):
 
         if DEBUG == False or inputk == "":
             pose = list(r.fk(r.get_q()))
-            save_matrix("robot_pose_" + str(i), pose)
-            save_matrix("circle_coords_" + str(i), center)
+            save_matrix("robot_pose_" + pose_name + str(i), pose)
+            save_matrix("circle_coords_" + pose_name + str(i), center)
 
 
 def rotate_to_zero(r: RobotBosch):
@@ -78,19 +78,21 @@ camera = CameraHelper(robot, "")
 
 q_positions = [RIGHT_Q_EXTREME, RIGHT_Q_MID, LEFT_Q_EXTREME, LEFT_Q_MID]
 
-for pos in q_positions:
+pose_names = ["RE", "RM", "LE", "LM"]
+
+for i, pos in enumerate(q_positions):
     rotate_to_zero(robot)
     
     robot.move_to_q(pos)
     robot.wait_for_motion_stop()
 
     shift_height(robot, MAX_Z_Q)
-    get_data_in_pose(robot, camera)
+    get_data_in_pose(robot, camera, pose_name[i] + "HIGH_")
     
     rotate_to_zero(robot)
 
     shift_height(robot, MIN_Z_Q)
-    get_data_in_pose(robot, camera)
+    get_data_in_pose(robot, camera, pose_name[i] + "LOW_")
 
 robot.hard_home()
 robot.close()
