@@ -5,10 +5,16 @@ MAX_Z = 0.5
 MAX_Z_Q = 0
 
 MIN_Z = 0.8
-MIN_Z_Q = - 0.33
+MIN_Z_Q = - 0.31
 
 LEFT_Q = [-4.83117755e-01, -6.83617751e-01,  2.25225225e-05, -7.05254062e-04]
 RIGHT_Q = [1.08819848e+00, -6.83617751e-01,  2.47747748e-05, -6.17097304e-04]
+
+LEFT_Q_EXTREME =  [1, -1,  2.47747748e-05, 0]
+LEFT_Q_MID = [0.9, -1.1, 0, 0]
+
+RIGHT_Q_EXTREME =  [-1.33, 1.2, 0, 0]
+RIGHT_Q_MID = [-1, 1.1, 0, 0]
 
 def load_matrix(name):
     with open(name, "rb") as f:
