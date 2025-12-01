@@ -6,7 +6,7 @@ robot.initialize(home=False)
 
 camera_helper = CameraHelper(robot, "board")
 
-camera_helper.capture_image()
+camera_helper.capture_image_date("board")
 
 robot.release()
 robot.close()

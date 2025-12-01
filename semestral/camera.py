@@ -12,3 +12,8 @@ class CameraHelper:
     def capture_image(self, name: str, save: bool = True):
         image = self.robot.grab_image()
         cv2.imwrite(name + ".png", image)
+
+    def capture_image_date(self, name: str | None, save: bool = True):
+        timestamp = datetime.now().isoformat()
+        image = self.robot.grab_image()
+        cv2.imwrite(self.prefix + "_" + timestamp + ".png", image)
