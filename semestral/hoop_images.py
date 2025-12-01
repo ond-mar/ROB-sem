@@ -2,7 +2,7 @@ from ctu_bosch_sr450 import RobotBosch
 from camera import CameraHelper
 import numpy as np
 import time
-from utils import MIN_Z_Q
+from utils import MIN_Z_Q, BASE_Z_Q
 from datetime import datetime
 
 robot = RobotBosch()
@@ -28,7 +28,8 @@ step = 0.05
 step_count = 20
 
 q = robot.get_q()
-q[2] = MIN_Z_Q
+q[2] = BASE_Z_Q
+# q[2] = MIN_Z_Q
 
 q[3] = np.pi / 2
 q[0] = step * 12 + q[0]
