@@ -27,3 +27,16 @@ def to_homogenous(r, t):
     transform[:3, 3] = t.flatten()
 
     return transform
+
+def select_q_min_rotation(qs: list, cq: list):
+    assert len(qs) > 0, "No Qs"
+
+    best_dist = abs(cq[3] - qs[0][3])
+    best_q = qs[0]
+
+    for q in qs:
+        if best_dist > abs(cq[3] - q[3]):
+            best_dist = abs(cq[3] - q[3])
+            best_q = q
+    
+    return best_q
