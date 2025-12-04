@@ -1,11 +1,21 @@
 import numpy as np
 import cv2
 
+Q_TOLERANCE = 0.001
+
+HOOP_LEN = 0.135
+
+MAZE_HEIGHT = 0.20
+
+MAZE_OFFSET = MAZE_HEIGHT + 0.02
+
 MAX_Z = 0.5
 MAX_Z_Q = 0
 
 MIN_Z = 0.8
 MIN_Z_Q = - 0.31
+
+ROBOT_Q_ROTATION_OFFSET = -0.22
 
 LEFT_Q = [-4.83117755e-01, -6.83617751e-01,  2.25225225e-05, -7.05254062e-04]
 RIGHT_Q = [1.08819848e+00, -6.83617751e-01,  2.47747748e-05, -6.17097304e-04]
@@ -27,6 +37,11 @@ def to_homogenous(r, t):
     transform[:3, 3] = t.flatten()
 
     return transform
+
+def select_qs_height_change_only(qs: list, cq) -> list[list]:
+    possible_qs = filter(lambda q: np.isclose(cq[0], q[0]) and np.isclose(cq[1], q[0]), qs)
+
+    return list(possible_qs)
 
 def select_q_min_rotation(qs: list, cq: list):
     assert len(qs) > 0, "No Qs"

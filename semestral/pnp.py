@@ -24,7 +24,7 @@ def load_data():
 
         # print("old pose", robot_pose)
 
-        angle = robot_pose[3] + np.pi
+        angle = robot_pose[3] - np.pi
 
         robot_pose[0] += 0.135 * np.cos(angle)
         robot_pose[1] += 0.135 * np.sin(angle)

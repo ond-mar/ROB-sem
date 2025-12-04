@@ -2,8 +2,8 @@ import numpy as np
 from camera import CameraHelper
 from ctu_bosch_sr450 import RobotBosch
 import cv2
-from utils import to_homogenous, select_q_min_rotation
-
+from utils import to_homogenous, select_q_min_rotation, HOOP_LEN, MAZE_OFFSET, ROBOT_Q_ROTATION_OFFSET, MAZE_HEIGHT
+from planner import TrajectoryPlanner, MazeType
 
 k = np.load("calibration/k.npy")
 dist = np.load("calibration/dist.npy")
@@ -37,30 +37,44 @@ rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners, 0.04, k, dist)
 
 tvec = np.asarray(tvec)
 
+if len(tvec) < 2:
+    print("Could not find markers")
+    quit()
+
 center = (tvec[0][0] + tvec[1][0]) / 2
 
 center = np.asarray(np.hstack([center, 1]))
 
 print("Center camera: ", center)
 
-robot_center = list(t_camera2robot @ center)
+board_center = list(t_camera2robot @ center)
 
-print("Robot center: ", robot_center)
+print("Board pose: ", board_center)
 
-print("Adujsted robot center: ", robot_center[0], robot_center[1] - 0.135, robot_center[2] + 0.23, ((3/2) * np.pi) - np.pi * 0.3)
+planner = TrajectoryPlanner(robot, MazeType.A, board_center)
 
-q = robot.ik_xyz(robot_center[0], robot_center[1] - 0.135, robot_center[2] + 0.23, ((3/2)) * np.pi - np.pi * 0.05)
+configuration_sequnce = planner.get_q_sequence_maze_a()
 
-print("Q: ", q)
-
-if len(q) > 0:
-    selected = list(select_q_min_rotation(q, robot.get_q()))
-
-    print("Selected q: ", selected)
-
-    robot.move_to_q(selected)
-
+for configuration in configuration_sequnce:
+    print("Moving to q: ", configuration)
+    robot.move_to_q(configuration)
     robot.wait_for_motion_stop()
 
+input("press any button to reset")
 
+for configuration in configuration_sequnce[::-1]:
+    print("Moving to q: ", configuration)
+    robot.move_to_q(configuration)
+    robot.wait_for_motion_stop()
 
+current = robot.get_q()
+
+q_res = [0.5, 0.5, 0, current[3]]
+robot.move_to_q(q_res)
+robot.wait_for_motion_stop()
+
+q_res[3] = 0
+robot.move_to_q(q_res)
+robot.wait_for_motion_stop()
+robot.soft_home()
+robot.wait_for_motion_stop()
