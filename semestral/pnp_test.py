@@ -26,12 +26,16 @@ print("Moving to max q: ", robot.q_max)
 robot.wait_for_motion_stop()
 
 img = cam.get_image()
+img_copy = img.copy()
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
 parameters = cv2.aruco.DetectorParameters()
 detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
 corners, ids, rejected = detector.detectMarkers(gray)
+
+cv2.aruco.drawDetectedMarkers(img_copy, corners, ids) # Export image with ArUcos detected
+cv2.imwrite("debug/table.png", img_copy)
 
 rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners, 0.04, k, dist)
 
@@ -78,3 +82,4 @@ robot.move_to_q(q_res)
 robot.wait_for_motion_stop()
 robot.soft_home()
 robot.wait_for_motion_stop()
+robot.close()
