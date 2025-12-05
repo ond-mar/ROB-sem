@@ -13,6 +13,8 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
     img_centers = np.empty((len(hoop_positions), 2))
 
     for i, img in enumerate(images):
+        copy = img.copy()
+        
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) # convert to HSV
         img = cv2.medianBlur(img, 5) # apply median blur to reduce noise
         cv2.waitKey(0)
@@ -27,12 +29,9 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
         x, y, r = circles[0][0]
         img_centers[i] = [x, y]
 
-        # copy = img.copy()
-        # cv2.circle(copy, center=(x, y), radius=2, color=(0, 0, 255))
-
-        # cv2.imshow("image", copy)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
+        
+        cv2.circle(copy, center=(x, y), radius=5, color=(0, 0, 255))
+        cv2.imwrite(f"cv/hoop_detected_{i}.png", copy)
 
 
     ref_centers = np.empty((len(hoop_positions), 2))
@@ -44,8 +43,8 @@ def find_hoop_homography(images: ArrayLike, hoop_positions: List[dict]) -> np.nd
     return homography
 
 
-robot = RobotBosch()
-robot.initialize(False)
+robot = RobotBosch(tty_dev=None)
+# robot.initialize(False)
 
 DIR_PATH = Path("hoop_images")
 
@@ -61,11 +60,7 @@ for stem in stems:
     image = cv2.imread(im_path)
 
     coords = list(robot.fk(matrix))
-
-    print(im_path)
-    print(0.135 * np.cos(coords[3]))
-    print(0.135 * np.sin(coords[3]))
-
+    print(f"coords = {coords} from {stem}")
 
     coords[0] -= 0.135 * np.cos(coords[3])
     coords[1] -= 0.135 * np.sin(coords[3])
