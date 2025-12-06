@@ -1,16 +1,10 @@
 from ctu_bosch_sr450 import RobotBosch
-from enum import Enum
 from utils import to_homogenous, select_q_min_rotation, HOOP_LEN, MAZE_OFFSET, ROBOT_Q_ROTATION_OFFSET, MAZE_HEIGHT, Q_TOLERANCE
 import numpy as np
 from mazes import MazeType, MAZE_SHAPES
 
 from robotics_toolbox.core.se3 import SE3
 from robotics_toolbox.core.so3 import SO3
-
-# class MazeType(Enum):
-#     A = 1
-#     B = 2
-#     C = 3
 
 class TrajectoryPlanner:
     def __init__(self, robot: RobotBosch, maze_type: MazeType, board_center: list, board_rotation: float):
@@ -19,12 +13,18 @@ class TrajectoryPlanner:
         self.board_center = board_center
         self.board_rotation = board_rotation
 
+        self.offset = 0
+        self.hoop_rotation = 0
+
+        self.maze_points = self.maze_to_robot_points()
+
     @property
     def current(self):
         return self.robot.get_q()
 
     def calculate_ee_start_pose(self):
-        pose = self.board_center.copy()
+        # pose = self.board_center.copy()
+        pose = self.maze_points[-1].copy()
         
         if pose[1] <= 0:
             offset = HOOP_LEN
@@ -32,6 +32,9 @@ class TrajectoryPlanner:
         else:
             rotation = ((3/2)) * np.pi + ROBOT_Q_ROTATION_OFFSET
             offset = -HOOP_LEN
+
+        self.offset = offset
+        self.hoop_rotation = rotation
 
         pose[1] += offset
         pose[2] += MAZE_OFFSET
@@ -95,6 +98,11 @@ class TrajectoryPlanner:
         print(configurations[1])
 
         return configurations
+    
+    def get_q_sequence_tostart(self):
+        print("Calculating trajectory to start position")
+
+        configurations = []
     
     def maze_to_robot_points(self):
         # Transformation matrix
