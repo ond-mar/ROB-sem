@@ -2,17 +2,22 @@ from ctu_bosch_sr450 import RobotBosch
 from enum import Enum
 from utils import to_homogenous, select_q_min_rotation, HOOP_LEN, MAZE_OFFSET, ROBOT_Q_ROTATION_OFFSET, MAZE_HEIGHT, Q_TOLERANCE
 import numpy as np
+from mazes import MazeType, MAZE_SHAPES
 
-class MazeType(Enum):
-    A = 1
-    B = 2
-    C = 3
+from robotics_toolbox.core.se3 import SE3
+from robotics_toolbox.core.so3 import SO3
+
+# class MazeType(Enum):
+#     A = 1
+#     B = 2
+#     C = 3
 
 class TrajectoryPlanner:
-    def __init__(self, robot: RobotBosch, maze_type: MazeType, board_center: list):
+    def __init__(self, robot: RobotBosch, maze_type: MazeType, board_center: list, board_rotation: float):
         self.robot = robot
         self.maze_type = maze_type
         self.board_center = board_center
+        self.board_rotation = board_rotation
 
     @property
     def current(self):
@@ -90,3 +95,20 @@ class TrajectoryPlanner:
         print(configurations[1])
 
         return configurations
+    
+    def maze_to_robot_points(self):
+        # Transformation matrix
+        translation_SE3 = SE3(translation=self.board_center)
+        rotation_SO3 = SO3.rz(self.board_rotation)
+        rotation_SE3 = SE3(rotation=rotation_SO3)
+
+        transform = translation_SE3 * rotation_SE3
+
+        # Transform maze points to robot points
+        maze_points = MAZE_SHAPES[self.maze_type]
+        robot_points = np.empty(maze_points.shape)
+        for i, point in enumerate(maze_points):
+            transformed_point = transform.act(point)
+            robot_points[i] = transformed_point
+
+        return robot_points
