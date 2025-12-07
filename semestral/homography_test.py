@@ -7,7 +7,7 @@ robot.initialize()
 
 print(robot.fk(robot.get_q()))
 
-ref_x, ref_y = 200 , 80
+ref_x, ref_y = 1780 , 780
 
 homography = load_matrix("homography.npy")
 

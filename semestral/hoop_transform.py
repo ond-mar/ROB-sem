@@ -62,8 +62,8 @@ for stem in stems:
 
     coords = list(robot.fk(matrix))
 
-    #coords[0] += 0.14 * np.cos(coords[3])
-    #coords[1] += 0.14 * np.sin(coords[3])
+    coords[0] += 0.14 * np.cos(coords[3])
+    coords[1] += 0.14 * np.sin(coords[3])
 
     images.append(image)
     vectors.append({'translation_vector': np.asarray(coords)})
