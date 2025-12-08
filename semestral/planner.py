@@ -13,7 +13,9 @@ class TrajectoryPlanner:
         self.board_center = board_center
         self.board_rotation = board_rotation
 
-        self.offset = 0
+        #self.offset = 0
+        self.offset_x = 0
+        self.offset_y = 0
         self.hoop_rotation = 0
 
         self.maze_points = self.maze_to_robot_points()
@@ -30,13 +32,53 @@ class TrajectoryPlanner:
         pose = self.maze_points[-1].tolist()
         pose.append(0)
 
+        '''
         if pose[1] <= 0:
             offset = HOOP_LEN
             rotation = ((1/2)) * np.pi + ROBOT_Q_ROTATION_OFFSET
         else:
             rotation = ((3/2)) * np.pi + ROBOT_Q_ROTATION_OFFSET
             offset = -HOOP_LEN
+        '''
 
+        if pose[0] <= 0.3 and pose[1] <= 0:
+            rotation = (1/4) * np.pi 
+            offset_x = HOOP_LEN * np.cos(rotation)
+            offset_y = HOOP_LEN * np.sin(rotation)
+        
+        elif pose[0] <= 0.3 and pose[1] > 0:
+            rotation = (7/4) * np.pi 
+            offset_x = HOOP_LEN * np.cos(rotation)
+            offset_y = HOOP_LEN * np.sin(rotation)
+        
+        elif pose[0] > 0.3 and pose[0] < 0.4 and pose[1] <= 0:
+            rotation = (1/2) * np.pi 
+            offset_x = HOOP_LEN * np.cos(rotation)
+            offset_y = HOOP_LEN * np.sin(rotation)
+        
+        elif pose[0] > 0.3 and pose[0] < 0.4 and pose[1] > 0:
+            rotation = (3/2) * np.pi 
+            offset_x = HOOP_LEN * np.cos(rotation)
+            offset_y = HOOP_LEN * np.sin(rotation)
+
+        elif pose[0] > 0.4 and pose[1] <= 0:
+            rotation = (1/2) * np.pi + 0.5 
+            offset_x = HOOP_LEN * np.cos(rotation)
+            offset_y = HOOP_LEN * np.sin(rotation)
+        
+        elif pose[0] > 0.4 and pose[1] > 0:
+            rotation = (3/2) * np.pi - 0.5 
+            offset_x = HOOP_LEN * np.cos(rotation)
+            offset_y = HOOP_LEN * np.sin(rotation)
+        
+
+        self.offset_x = offset_x
+        self.offset_y = offset_y
+        self.hoop_rotation = rotation + ROBOT_Q_ROTATION_OFFSET
+
+        pose = [pose[0] + offset_x, pose[1] + offset_y, pose[2] + 0.025, rotation + ROBOT_Q_ROTATION_OFFSET]
+
+        '''
         self.offset = offset
         self.hoop_rotation = rotation
 
@@ -44,6 +86,7 @@ class TrajectoryPlanner:
         # pose[2] += MAZE_OFFSET
         pose[2] += 0.025
         pose[3] = rotation
+        '''
 
         return pose
 
@@ -190,7 +233,9 @@ class TrajectoryPlanner:
         pose = point.tolist()
         pose.append(0)
 
-        pose[1] += self.offset
+        pose[0] += self.offset_x 
+        pose[1] += self.offset_y
+        #pose[1] += self.offset
         pose[3] = self.hoop_rotation
 
         return pose

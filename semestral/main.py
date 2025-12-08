@@ -8,7 +8,7 @@ from planner import TrajectoryPlanner
 from maze_pose_solver import MazePoseSolver
 from time import sleep
 
-MAZE_TYPE = MazeType.C
+MAZE_TYPE = MazeType.A
 
 # Load callibraion
 k = np.load("calibration/k.npy")
@@ -46,7 +46,7 @@ for config in configs_to_start:
     robot.move_to_q(config)
     robot.wait_for_motion_stop()
 
-input("press any key")
+input("press enter")
 
 configs_through_maze = planner.get_q_sequence_throughmaze()
 for config in configs_through_maze:
@@ -54,7 +54,7 @@ for config in configs_through_maze:
     robot.move_to_q(config)
     robot.wait_for_motion_stop()
 
-input("press any key")
+input("press enter")
 
 # Return to start pose
 for config in configs_through_maze[::-1]:
