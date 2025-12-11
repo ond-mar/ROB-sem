@@ -10,7 +10,9 @@ Make the robot perform the assigned task by running the **main.py** file.
 Other scripts
 -----------
 **camera_robot_pnp.py**: calculate camera2robot matrix using PnP algorithm
+
 **camera.py**: helper class Camera for capturing hoop_images
+
 **hoop_images2.py**: generating PnP callibration data
 **images.py**: helper script for simple image capture
 **k_matrix.py**: calculate K and distortions based on ChAruCo board images
